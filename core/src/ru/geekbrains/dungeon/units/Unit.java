@@ -1,7 +1,6 @@
 package ru.geekbrains.dungeon.units;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import ru.geekbrains.dungeon.GameController;
@@ -13,6 +12,7 @@ public abstract class Unit {
     TextureRegion textureHp;
     int hp;
     int hpMax;
+    int strength;
     int cellX;
     int cellY;
     Vector2 tmp;
@@ -25,19 +25,27 @@ public abstract class Unit {
         return cellY;
     }
 
-    public Unit(GameController gc, int cellX, int cellY, int hpMax) {
+    public Unit(GameController gc, int cellX, int cellY, int hpMax, int strength) {
         this.gc = gc;
         this.hpMax = hpMax;
         this.hp = hpMax;
         this.cellX = cellX;
         this.cellY = cellY;
         this.tmp = new Vector2(0, 0);
+        this.strength = strength;
     }
 
-    public boolean takeDamage(int amount) {
-        hp -= amount;
+    public boolean hit(Unit attacker, int amount) {
+        damage(amount);
+        reaction(attacker);
         return hp <= 0;
     }
+
+    protected void damage(int amount) {
+        hp -= amount;
+    }
+
+    protected abstract void reaction(Unit attacker);
 
     public abstract void update(float dt);
 

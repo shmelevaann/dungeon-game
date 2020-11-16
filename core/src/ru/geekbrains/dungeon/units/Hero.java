@@ -1,24 +1,41 @@
 package ru.geekbrains.dungeon.units;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import ru.geekbrains.dungeon.GameController;
 import ru.geekbrains.dungeon.GameMap;
 
 public class Hero extends Unit {
+    private static final int MAX_TURN_COUNT = 5;
     float movementTime;
     float movementMaxTime;
     int targetX, targetY;
+    private int experience;
+    private int turnCounter;
+    private BitmapFont font;
 
     public Hero(TextureAtlas atlas, GameController gc) {
-        super(gc, 1, 1, 10);
+        super(gc, 1, 1, 10, 1);
         this.texture = atlas.findRegion("knight");
         this.textureHp = atlas.findRegion("hp");
         this.movementMaxTime = 0.2f;
         this.targetX = cellX;
         this.targetY = cellY;
+        this.experience = 0;
+        this.turnCounter = MAX_TURN_COUNT;
+        setFont();
+    }
+
+    private void setFont() {
+        font = new BitmapFont();
+        font.setColor(225, 225, 0, 1);
+    }
+
+    @Override
+    protected void reaction(Unit attacker) {
+        //пока не бьет, но будет
     }
 
     public void update(float dt) {
@@ -41,7 +58,10 @@ public class Hero extends Unit {
         if (m != null) {
             targetX = cellX;
             targetY = cellY;
-            m.takeDamage(1);
+            if (m.hit(this, strength)) {
+                experience++;
+            }
+            updateTurnCounter();
         }
 
         if (!gc.getGameMap().isCellPassable(targetX, targetY)) {
@@ -55,7 +75,16 @@ public class Hero extends Unit {
                 movementTime = 0;
                 cellX = targetX;
                 cellY = targetY;
+                updateTurnCounter();
             }
+        }
+    }
+
+    private void updateTurnCounter() {
+        if (turnCounter == 0) {
+            turnCounter = MAX_TURN_COUNT;
+        } else {
+            turnCounter--;
         }
     }
 
@@ -75,5 +104,6 @@ public class Hero extends Unit {
         batch.setColor(0.0f, 1.0f, 0.0f, 1.0f);
         batch.draw(textureHp, px + 2, py + 52, (float) hp / hpMax * 56, 8);
         batch.setColor(1.0f, 1.0f, 1.0f, 1.0f);
+        font.draw(batch, String.valueOf(turnCounter), px + 2, py + 60 + font.getLineHeight());
     }
 }
