@@ -23,8 +23,4 @@ public enum Directions {
     public int getOffsetY(){
         return offsetY;
     }
-
-    public static Directions getRandomDirection() {
-        return Directions.values()[MathUtils.random.nextInt(4)];
-    }
 }
