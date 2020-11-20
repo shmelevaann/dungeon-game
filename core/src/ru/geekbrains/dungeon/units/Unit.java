@@ -3,8 +3,10 @@ package ru.geekbrains.dungeon.units;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import ru.geekbrains.dungeon.BattleCalc;
+import ru.geekbrains.dungeon.Directions;
 import ru.geekbrains.dungeon.GameController;
 import ru.geekbrains.dungeon.GameMap;
 
@@ -23,6 +25,7 @@ public abstract class Unit {
     float movementMaxTime;
     int targetX, targetY;
     int turns, maxTurns;
+    int visionRange;
 
     public int getDefence() {
         return defence;
@@ -53,6 +56,7 @@ public abstract class Unit {
         this.maxTurns = 5;
         this.movementMaxTime = 0.2f;
         this.attackRange = 2;
+        this.visionRange = 5;
     }
 
     public void startTurn() {
@@ -79,14 +83,15 @@ public abstract class Unit {
         return cellY == targetY && cellX == targetX;
     }
 
-    public void goTo(int argCellX, int argCellY) {
-        if (!gc.getGameMap().isCellPassable(argCellX, argCellY) || !gc.getUnitController().isCellFree(argCellX, argCellY)) {
-            return;
-        }
-        if (Math.abs(argCellX - cellX) + Math.abs(argCellY - cellY) == 1) {
+    public boolean goTo(int argCellX, int argCellY) {
+        if (gc.getGameMap().isCellPassable(argCellX, argCellY)
+                && gc.getUnitController().isCellFree(argCellX, argCellY)
+                && Math.abs(argCellX - cellX) + Math.abs(argCellY - cellY) == 1) {
             targetX = argCellX;
             targetY = argCellY;
+            return true;
         }
+        return false;
     }
 
     public boolean canIAttackThisTarget(Unit target) {
@@ -131,5 +136,37 @@ public abstract class Unit {
 
     public int getTurns() {
         return turns;
+    }
+
+    public boolean isUnitInSight(Unit unit) {
+        return Math.abs(unit.getCellX() - this.cellX) <= visionRange
+                && Math.abs(unit.getCellY() - this.cellY) <= visionRange;
+    }
+
+    protected void moveCloserTo(int targetX, int targetY) {
+        int nextX = -1, nextY = -1;
+        float bestDst = 10000;
+        for (int i = cellX - 1; i <= cellX + 1; i++) {
+            for (int j = cellY - 1; j <= cellY + 1; j++) {
+                if (Math.abs(cellX - i) + Math.abs(cellY - j) == 1
+                        && gc.getGameMap().isCellPassable(i, j)
+                        && gc.getUnitController().isCellFree(i, j)) {
+                    float dst = (float) Math.sqrt((i - targetX) * (i - targetX) + (j - targetY) * (j - targetY));
+                    if (dst < bestDst) {
+                        bestDst = dst;
+                        nextX = i;
+                        nextY = j;
+                    }
+                }
+            }
+        }
+        goTo(nextX, nextY);
+    }
+
+    protected void randomMove() {
+        Directions direction;
+        do {
+            direction = Directions.getRandomDirection();
+        } while (!goTo(cellX + direction.getOffsetX(), cellY + direction.getOffsetY()));
     }
 }
