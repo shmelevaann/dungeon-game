@@ -1,14 +1,15 @@
 package ru.geekbrains.dungeon.units;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Vector2;
 import ru.geekbrains.dungeon.BattleCalc;
 import ru.geekbrains.dungeon.Directions;
 import ru.geekbrains.dungeon.GameController;
 import ru.geekbrains.dungeon.GameMap;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class Unit {
     GameController gc;
@@ -26,6 +27,8 @@ public abstract class Unit {
     int targetX, targetY;
     int turns, maxTurns;
     int visionRange;
+
+    private List<Directions> tmpDirections;
 
     public int getDefence() {
         return defence;
@@ -57,6 +60,8 @@ public abstract class Unit {
         this.movementMaxTime = 0.2f;
         this.attackRange = 2;
         this.visionRange = 5;
+
+        this.tmpDirections = new ArrayList<>();
     }
 
     public void startTurn() {
@@ -83,15 +88,13 @@ public abstract class Unit {
         return cellY == targetY && cellX == targetX;
     }
 
-    public boolean goTo(int argCellX, int argCellY) {
+    public void goTo(int argCellX, int argCellY) {
         if (gc.getGameMap().isCellPassable(argCellX, argCellY)
                 && gc.getUnitController().isCellFree(argCellX, argCellY)
                 && Math.abs(argCellX - cellX) + Math.abs(argCellY - cellY) == 1) {
             targetX = argCellX;
             targetY = argCellY;
-            return true;
         }
-        return false;
     }
 
     public boolean canIAttackThisTarget(Unit target) {
@@ -164,9 +167,26 @@ public abstract class Unit {
     }
 
     protected void randomMove() {
-        Directions direction;
-        do {
-            direction = Directions.getRandomDirection();
-        } while (!goTo(cellX + direction.getOffsetX(), cellY + direction.getOffsetY()));
+        List<Directions> allowedDirections = allowedDirections();
+        if (!allowedDirections.isEmpty()) {
+            Directions direction = allowedDirections.get(MathUtils.random.nextInt(allowedDirections.size()));
+            goTo(cellX + direction.getOffsetX(), cellY + direction.getOffsetY());
+        } else {
+            turns = 0;
+        }
+    }
+
+    private List<Directions> allowedDirections() {
+        Directions[] directions = Directions.values();
+        tmpDirections.clear();
+        for (Directions direction : directions) {
+            int nextX = cellX + direction.getOffsetX();
+            int nextY = cellY + direction.getOffsetY();
+            if (gc.getGameMap().isCellPassable(nextX, nextY)
+                    && gc.getUnitController().isCellFree(nextX, nextY)) {
+                tmpDirections.add(direction);
+            }
+        }
+        return tmpDirections;
     }
 }

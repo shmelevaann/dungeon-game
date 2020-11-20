@@ -45,8 +45,7 @@ public class Monster extends Unit {
     }
 
     public void tryToMove() {
-
-        if (isUnitInSight(gc.getUnitController().getHero())) {
+        if (isUnitInSight(target)) {
             moveCloserTo(target.getCellX(), target.getCellY());
         } else {
             randomMove();
