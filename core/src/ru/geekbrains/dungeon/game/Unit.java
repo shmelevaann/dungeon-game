@@ -95,10 +95,11 @@ public abstract class Unit implements Poolable {
                 cellY - target.getCellY() == 0 && Math.abs(cellX - target.getCellX()) <= attackRange;
     }
 
-    public void attack(Unit target) {
-        target.takeDamage(BattleCalc.attack(this, target));
+    public boolean attack(Unit target) {
+        boolean isDead = target.takeDamage(BattleCalc.attack(this, target));
         this.takeDamage(BattleCalc.checkCounterAttack(this, target));
         turns--;
+        return isDead;
     }
 
     public void update(float dt) {
@@ -122,15 +123,17 @@ public abstract class Unit implements Poolable {
             py = cellY * GameMap.CELL_SIZE + (targetY - cellY) * (movementTime / movementMaxTime) * GameMap.CELL_SIZE;
         }
         batch.draw(texture, px, py);
-        batch.setColor(0.0f, 0.0f, 0.0f, 1.0f);
-
 
         float barX = px, barY = py + MathUtils.sin(innerTimer * 5.0f) * 2;
+
+        float alfaHp = (hp == hpMax) ? 0.2f : 1.0f;
+        batch.setColor(0.0f, 0.0f, 0.0f, alfaHp);
         batch.draw(textureHp, barX + 1, barY + 51, 58, 10);
-        batch.setColor(0.7f, 0.0f, 0.0f, 1.0f);
+        batch.setColor(0.7f, 0.0f, 0.0f, alfaHp);
         batch.draw(textureHp, barX + 2, barY + 52, 56, 8);
-        batch.setColor(0.0f, 1.0f, 0.0f, 1.0f);
+        batch.setColor(0.0f, 1.0f, 0.0f, alfaHp);
         batch.draw(textureHp, barX + 2, barY + 52, (float) hp / hpMax * 56, 8);
+
         batch.setColor(1.0f, 1.0f, 1.0f, 1.0f);
         font18.draw(batch, "" + hp, barX, barY + 64, 60, 1, false);
     }

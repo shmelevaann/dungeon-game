@@ -2,6 +2,7 @@ package ru.geekbrains.dungeon.game;
 
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.MathUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,8 +56,19 @@ public class UnitController {
         index++;
         if (index >= allUnits.size()) {
             index = 0;
+            gc.setNextRound();
+            if(gc.getRound() % 3 == 0) {
+                allUnits.add(monsterController.activate(MathUtils.random.nextInt(gc.getGameMap().getCellsX()),
+                        MathUtils.random.nextInt(gc.getGameMap().getCellsY())));
+            }
         }
+
         currentUnit = allUnits.get(index);
+
+        if (currentUnit.hp < currentUnit.hpMax) {
+            currentUnit.hp++;
+        }
+
         currentUnit.startTurn();
     }
 
