@@ -45,8 +45,8 @@ public class Monster extends Unit {
             attack(target);
             return;
         }
-        if (amIBlocked()) {
-            turns = 0;
+        if (amIBlocked() || movementTurns == 0) {
+            endTurn();
             return;
         }
         if (Utils.getCellsIntDistance(cellX, cellY, target.getCellX(), target.getCellY()) < 5) {
