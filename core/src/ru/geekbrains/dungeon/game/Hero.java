@@ -1,6 +1,7 @@
 package ru.geekbrains.dungeon.game;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import lombok.Data;
@@ -22,12 +23,17 @@ public class Hero extends Unit {
 
     public void update(float dt) {
         super.update(dt);
-        if (Gdx.input.justTouched() && canIMakeAction()) {
-            Monster m = gc.getUnitController().getMonsterController().getMonsterInCell(gc.getCursorX(), gc.getCursorY());
-            if (m != null && canIAttackThisTarget(m)) {
-                attack(m);
-            } else {
-                goTo(gc.getCursorX(), gc.getCursorY());
+        if (gc.getUnitController().isItMyTurn(this)) {
+            if (Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
+                endTurn();
+            }
+            if (Gdx.input.justTouched()) {
+                Monster m = gc.getUnitController().getMonsterController().getMonsterInCell(gc.getCursorX(), gc.getCursorY());
+                if (m != null && canIAttackThisTarget(m)) {
+                    attack(m);
+                } else if (movementTurns > 0){
+                    goTo(gc.getCursorX(), gc.getCursorY());
+                }
             }
         }
     }
