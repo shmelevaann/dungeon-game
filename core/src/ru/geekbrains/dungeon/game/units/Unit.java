@@ -5,15 +5,13 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import lombok.Data;
-import ru.geekbrains.dungeon.game.BattleCalc;
-import ru.geekbrains.dungeon.game.GameController;
-import ru.geekbrains.dungeon.game.GameMap;
-import ru.geekbrains.dungeon.game.Weapon;
+import ru.geekbrains.dungeon.game.*;
 import ru.geekbrains.dungeon.helpers.Assets;
 import ru.geekbrains.dungeon.helpers.Poolable;
 
 @Data
 public abstract class Unit implements Poolable {
+
     public enum Direction {
         LEFT(0), RIGHT(1), UP(2), DOWN(3);
 
@@ -42,28 +40,29 @@ public abstract class Unit implements Poolable {
             }
             return DOWN;
         }
-    }
 
+    }
     GameController gc;
+
     TextureRegion[][] textures;
     TextureRegion textureHp;
     Stats stats;
-
     int cellX;
+
     int cellY;
     int gold;
     float movementTime;
     float movementMaxTime;
     int targetX, targetY;
     Weapon weapon;
-
+    Armor armor;
     float innerTimer;
+
     StringBuilder stringHelper;
     Direction currentDirection;
-
     float timePerFrame;
-    float walkingTime;
 
+    float walkingTime;
     public Unit(GameController gc, int cellX, int cellY, int hpMax, String textureName) {
         this.gc = gc;
         this.stats = new Stats(hpMax, 2, 1, 1, 5, 1, 5);
@@ -122,7 +121,8 @@ public abstract class Unit implements Poolable {
         if (!gc.getGameMap().isCellPassable(argCellX, argCellY) || !gc.getUnitController().isCellFree(argCellX, argCellY)) {
             return;
         }
-        if (stats.movePoints > 0 && Math.abs(argCellX - cellX) + Math.abs(argCellY - cellY) == 1) {
+        if (stats.movePoints >= gc.getGameMap().getCellCost(argCellX, argCellY)
+                && Math.abs(argCellX - cellX) + Math.abs(argCellY - cellY) == 1) {
             targetX = argCellX;
             targetY = argCellY;
             currentDirection = Direction.getMoveDirection(cellX, cellY, targetX, targetY);
@@ -152,7 +152,7 @@ public abstract class Unit implements Poolable {
                 movementTime = 0;
                 cellX = targetX;
                 cellY = targetY;
-                stats.movePoints--;
+                stats.movePoints -= gc.getGameMap().getCellCost(targetX, targetY);
                 gc.getGameMap().checkAndTakeDrop(this);
             }
         }
@@ -197,5 +197,12 @@ public abstract class Unit implements Poolable {
 
     public boolean amIBlocked() {
         return !(gc.isCellEmpty(cellX - 1, cellY) || gc.isCellEmpty(cellX + 1, cellY) || gc.isCellEmpty(cellX, cellY - 1) || gc.isCellEmpty(cellX, cellY + 1));
+    }
+
+    public String getInfo() {
+        stringHelper.setLength(0);
+        return stringHelper.append("Attack: ").append(stats.attack + weapon.getDamage())
+                .append("\nDefence: ").append(stats.defence + armor.getDefence())
+                .append("\nRadius: ").append(weapon.getRadius()).toString();
     }
 }

@@ -6,7 +6,7 @@ import lombok.Getter;
 @Getter
 public class Stats {
     int hp, maxHp;
-    int defence;
+    int attack, defence;
     int attackPoints, minAttackPoints, maxAttackPoints;
     int movePoints, minMovePoints, maxMovePoints;
     int visionRadius;
@@ -14,6 +14,7 @@ public class Stats {
     public Stats(int maxHp, int attack, int defence, int minAttackPoints, int maxAttackPoint, int minMovePoints, int maxMovePoint) {
         this.maxHp = maxHp;
         this.hp = this.maxHp;
+        this.attack = attack;
         this.defence = defence;
         this.minAttackPoints = minAttackPoints;
         this.maxAttackPoints = maxAttackPoint;

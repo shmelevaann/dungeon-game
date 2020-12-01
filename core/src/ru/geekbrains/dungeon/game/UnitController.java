@@ -103,4 +103,14 @@ public class UnitController {
         Monster m = monsterController.activate(cellX, cellY);
         allUnits.add(m);
     }
+
+    public Unit getUnitAtCell(int cellX, int cellY) {
+        for (int i = 0; i < allUnits.size(); i++) {
+            Unit unit = allUnits.get(i);
+            if (unit.getCellX() == cellX && unit.getCellY() == cellY) {
+                return unit;
+            }
+        }
+        return null;
+    }
 }
