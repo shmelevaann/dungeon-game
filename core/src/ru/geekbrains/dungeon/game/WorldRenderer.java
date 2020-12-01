@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import ru.geekbrains.dungeon.game.units.Unit;
 import ru.geekbrains.dungeon.helpers.Assets;
 import ru.geekbrains.dungeon.screens.ScreenManager;
 
@@ -35,6 +36,11 @@ public class WorldRenderer {
         batch.setColor(1, 1, 1, 0.5f);
         batch.draw(cursorTexture, gc.getCursorX() * GameMap.CELL_SIZE, gc.getCursorY() * GameMap.CELL_SIZE);
         batch.setColor(1, 1, 1, 1);
+
+        Unit unitAtCell = gc.getUnitController().getUnitAtCell(gc.getCursorX(), gc.getCursorY());
+        if (unitAtCell != null) {
+            font24.draw(batch, unitAtCell.getInfo(), gc.getGameMap().getCellsX() * gc.getGameMap().CELL_SIZE / 2, 100);
+        }
         batch.end();
 
         float camX = ScreenManager.getInstance().getCamera().position.x;
